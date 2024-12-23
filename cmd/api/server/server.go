@@ -21,6 +21,10 @@ func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 
 	db := database.New()
+	cfg, err := internal.LoadConfig()
+	if err != nil {
+		panic(fmt.Sprintf("failed to load config: %v", err))
+	}
 
 	repos := contracts.Repositories{
 		User:    repository.NewPostgresUserRepository(db.DB()),
@@ -29,7 +33,7 @@ func NewServer() *http.Server {
 	}
 
 	app := internal.Application{
-		Config:       internal.Config{},
+		Config:       cfg,
 		Repositories: repos,
 	}
 	services := contracts.Services{

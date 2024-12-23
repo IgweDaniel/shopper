@@ -13,6 +13,17 @@ type UserHandler struct {
 	Service contracts.UserService
 }
 
+// Register godoc
+// @Summary Register a new user
+// @Description Register a new user with email and password
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body dto.RegisterUserRequest true "User registration request"
+// @Success 201 {object} dto.RegisterUserResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /register [post]
 func (h *UserHandler) Register(c echo.Context) error {
 	req := new(dto.RegisterUserRequest)
 	if err := c.Bind(req); err != nil {
@@ -27,6 +38,17 @@ func (h *UserHandler) Register(c echo.Context) error {
 	return c.JSON(http.StatusCreated, resp)
 }
 
+// Login godoc
+// @Summary Login a user
+// @Description Login a user with email and password
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body dto.LoginUserRequest true "User login request"
+// @Success 200 {object} dto.LoginUserResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /login [post]
 func (h *UserHandler) Login(c echo.Context) error {
 	req := new(dto.LoginUserRequest)
 	if err := c.Bind(req); err != nil {

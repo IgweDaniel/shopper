@@ -8,7 +8,10 @@ import (
 	"github.com/IgweDaniel/shopper/internal/database"
 
 	"github.com/labstack/echo/v4"
+
+	_ "github.com/IgweDaniel/shopper/docs"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func RegisterRoutes(db database.Service, services *contracts.Services) http.Handler {
@@ -28,5 +31,6 @@ func RegisterRoutes(db database.Service, services *contracts.Services) http.Hand
 		return c.JSON(http.StatusOK, db.Health())
 	})
 
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	return e
 }

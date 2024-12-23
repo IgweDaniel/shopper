@@ -13,18 +13,18 @@ confirm:
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 
 
-## Build the application
+## build: Build the application
 build:
 	@echo "Building..."
 	
 	
 	@go build -o main cmd/api/main.go
 
-## Run the application
+## run: Run the application
 run:
 	@go run cmd/api/main.go
 
-## Create DB container
+## docker-run: Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \
 		: ; \
@@ -33,7 +33,7 @@ docker-run:
 		docker-compose up --build; \
 	fi
 
-## Shutdown DB container
+## docker-down: Shutdown DB container
 docker-down:
 	@if docker compose down 2>/dev/null; then \
 		: ; \
@@ -43,17 +43,23 @@ docker-down:
 	fi
 
 
-## Clean the binary
+## clean: Clean the binary
 clean:
 	@echo "Cleaning..."
 	@rm -f main
 
-# Live Reload
+## watch: Live Reload
 watch:
-	nodemon -e go --exec "make server" --signal SIGTERM
+	nodemon -e go --exec "make run" --signal SIGTERM
+
+## swagger: Generate swagger docs
+.PHONY: swagger
+swagger:
+    @echo "Generating Swagger documentation..."
+    swag init -g cmd/api/main.go
 
 
-
+## migrations/create: create a database migration
 .PHONY: migrations/create
 migrations/create: confirm
 	@echo "creating migration files for ${name}..."
