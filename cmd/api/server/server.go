@@ -3,8 +3,6 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -18,10 +16,9 @@ import (
 )
 
 func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
 
-	db := database.New()
 	cfg, err := internal.LoadConfig()
+	db := database.New(cfg)
 	if err != nil {
 		panic(fmt.Sprintf("failed to load config: %v", err))
 	}
@@ -43,7 +40,7 @@ func NewServer() *http.Server {
 	}
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", port),
+		Addr:         fmt.Sprintf(":%d", cfg.Port),
 		Handler:      routes.RegisterRoutes(db, &services),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,

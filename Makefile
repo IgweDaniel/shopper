@@ -55,8 +55,8 @@ watch:
 ## swagger: Generate swagger docs
 .PHONY: swagger
 swagger:
-    @echo "Generating Swagger documentation..."
-    swag init -g cmd/api/main.go
+	@echo "Generating Swagger documentation..."
+	swag init -g cmd/api/main.go
 
 
 ## migrations/create: create a database migration

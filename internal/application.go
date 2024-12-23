@@ -15,6 +15,13 @@ type Config struct {
 	}
 	DbUri string `env:"DB_URI,required"`
 	Env   string `env:"ENV,required"`
+
+	DbHost     string `env:"DB_HOST,required"`
+	DbPort     string `env:"DB_PORT,required"`
+	DbDatabase string `env:"DB_DATABASE,required"`
+	DbUsername string `env:"DB_USERNAME,required"`
+	DbPassword string `env:"DB_PASSWORD,required"`
+	DbSchema   string `env:"DB_SCHEMA,required"`
 }
 
 func LoadConfig() (Config, error) {
