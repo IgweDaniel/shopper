@@ -90,6 +90,7 @@ func (s *OrderService) GetOrders(userID string) ([]dto.GetOrderResponse, error) 
 }
 
 func (s *OrderService) CancelOrder(id string) error {
+	// FIXME: cancel order only if in pending state
 	order, err := s.app.Repositories.Order.GetOrderByID(id)
 	if err != nil {
 		return err

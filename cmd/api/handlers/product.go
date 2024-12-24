@@ -14,10 +14,8 @@ type ProductHandler struct {
 }
 
 func (h *ProductHandler) CreateProduct(c echo.Context) error {
-	req := new(dto.CreateProductRequest)
-	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
+
+	req := c.Get("validatedDTO").(*dto.CreateProductRequest)
 
 	resp, err := h.Service.CreateProduct(req)
 	if err != nil {
@@ -38,10 +36,8 @@ func (h *ProductHandler) GetProducts(c echo.Context) error {
 
 func (h *ProductHandler) UpdateProduct(c echo.Context) error {
 	id := c.Param("id")
-	req := new(dto.UpdateProductRequest)
-	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
+
+	req := c.Get("validatedDTO").(*dto.UpdateProductRequest)
 
 	resp, err := h.Service.UpdateProduct(id, req)
 	if err != nil {

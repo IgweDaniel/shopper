@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/IgweDaniel/shopper/cmd/api/helpers"
 	"github.com/IgweDaniel/shopper/internal/contracts"
 	"github.com/IgweDaniel/shopper/internal/dto"
 
@@ -14,11 +15,9 @@ type OrderHandler struct {
 }
 
 func (h *OrderHandler) CreateOrder(c echo.Context) error {
-	req := new(dto.CreateOrderRequest)
-	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
 
+	req := c.Get("validatedDTO").(*dto.CreateOrderRequest)
+	// FIXME: create order for a user
 	resp, err := h.Service.CreateOrder(req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create order"})
@@ -28,8 +27,8 @@ func (h *OrderHandler) CreateOrder(c echo.Context) error {
 }
 
 func (h *OrderHandler) GetOrders(c echo.Context) error {
-	userID := c.QueryParam("user_id")
-	orders, err := h.Service.GetOrders(userID)
+	authUser := helpers.ContextGetUser(c)
+	orders, err := h.Service.GetOrders(authUser.ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve orders"})
 	}
@@ -39,10 +38,7 @@ func (h *OrderHandler) GetOrders(c echo.Context) error {
 
 func (h *OrderHandler) UpdateOrder(c echo.Context) error {
 	id := c.Param("id")
-	req := new(dto.UpdateOrderRequest)
-	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
+	req := c.Get("validatedDTO").(*dto.UpdateOrderRequest)
 
 	resp, err := h.Service.UpdateOrder(id, req)
 	if err != nil {
@@ -54,7 +50,6 @@ func (h *OrderHandler) UpdateOrder(c echo.Context) error {
 
 func (h *OrderHandler) CancelOrder(c echo.Context) error {
 	id := c.Param("id")
-
 	if err := h.Service.CancelOrder(id); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to cancel order"})
 	}

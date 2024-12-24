@@ -23,13 +23,9 @@ type UserHandler struct {
 // @Success 201 {object} dto.RegisterUserResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /register [post]
+// @Router /user [post]
 func (h *UserHandler) Register(c echo.Context) error {
-	req := new(dto.RegisterUserRequest)
-	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
-
+	req := c.Get("validatedDTO").(*dto.RegisterUserRequest)
 	resp, err := h.Service.RegisterUser(req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
@@ -48,12 +44,9 @@ func (h *UserHandler) Register(c echo.Context) error {
 // @Success 200 {object} dto.LoginUserResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
-// @Router /login [post]
+// @Router /user/auth [post]
 func (h *UserHandler) Login(c echo.Context) error {
-	req := new(dto.LoginUserRequest)
-	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
+	req := c.Get("validatedDTO").(*dto.LoginUserRequest)
 
 	resp, err := h.Service.LoginUser(req)
 	if err != nil {
