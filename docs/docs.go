@@ -9,25 +9,51 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "API Support Team",
+            "email": "support@petmanagement.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
         "/orders": {
-            "get": {
-                "description": "Get a list of all orders",
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Create a new order",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "orders"
                 ],
-                "summary": "Get all orders",
+                "summary": "Create a new order",
+                "parameters": [
+                    {
+                        "description": "Order create request",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateOrderRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "allOf": [
                                 {
@@ -37,7 +63,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.GetOrderResponse"
+                                            "$ref": "#/definitions/dto.CreateOrderResponse"
                                         }
                                     }
                                 }
@@ -68,25 +94,21 @@ const docTemplate = `{
                 }
             }
         },
-        "/orders/{id}": {
+        "/orders/me": {
             "get": {
-                "description": "Get details of an order by ID",
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get all orders for authenticated user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "orders"
                 ],
-                "summary": "Get an order by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Order ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Get all orders for authenticated user",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -99,55 +121,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.GetOrderResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.ApiResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.GetOrderResponse"
                                             }
-                                        },
-                                        "message": {
-                                            "type": "string"
-                                        },
-                                        "success": {
-                                            "type": "boolean"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.ApiResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        },
-                                        "success": {
-                                            "type": "boolean"
                                         }
                                     }
                                 }
@@ -176,19 +153,23 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/orders/{id}/cancel": {
             "put": {
-                "description": "Update an order's details",
-                "consumes": [
-                    "application/json"
+                "security": [
+                    {
+                        "JWT": []
+                    }
                 ],
+                "description": "Cancel an order by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "orders"
                 ],
-                "summary": "Update an order",
+                "summary": "Cancel an order",
                 "parameters": [
                     {
                         "type": "string",
@@ -196,34 +177,13 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Order update request",
-                        "name": "order",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.UpdateOrderRequest"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "204": {
+                        "description": "No Content",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.ApiResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.UpdateOrderResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ApiResponse"
                         }
                     },
                     "400": {
@@ -236,12 +196,6 @@ const docTemplate = `{
                                 {
                                     "type": "object",
                                     "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
-                                            }
-                                        },
                                         "message": {
                                             "type": "string"
                                         },
@@ -317,16 +271,23 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "Delete an order by ID",
+            }
+        },
+        "/orders/{id}/status": {
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Update the status of an order by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "orders"
+                    "admin"
                 ],
-                "summary": "Delete an order",
+                "summary": "Update order status",
                 "parameters": [
                     {
                         "type": "string",
@@ -334,13 +295,34 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Order status update request",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateOrderStatusRequest"
+                        }
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/helpers.ApiResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helpers.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.UpdateOrderStatusResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -353,12 +335,6 @@ const docTemplate = `{
                                 {
                                     "type": "object",
                                     "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
-                                            }
-                                        },
                                         "message": {
                                             "type": "string"
                                         },
@@ -438,12 +414,18 @@ const docTemplate = `{
         },
         "/products": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get all products",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "products",
+                    "admin"
                 ],
                 "summary": "Get all products",
                 "responses": {
@@ -492,6 +474,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Create a new product with name, description, and price",
                 "consumes": [
                     "application/json"
@@ -500,7 +487,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "admin"
                 ],
                 "summary": "Create a new product",
                 "parameters": [
@@ -627,7 +614,99 @@ const docTemplate = `{
             }
         },
         "/products/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get a product by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products",
+                    "admin"
+                ],
+                "summary": "Get a product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helpers.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetProductResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helpers.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "success": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helpers.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "success": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
             "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Update a product's name, description, and price",
                 "consumes": [
                     "application/json"
@@ -636,7 +715,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "admin"
                 ],
                 "summary": "Update a product",
                 "parameters": [
@@ -769,12 +848,17 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Delete a product by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "admin"
                 ],
                 "summary": "Delete a product",
                 "parameters": [
@@ -841,7 +925,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user": {
+        "/users": {
             "post": {
                 "description": "Register a new user with email and password",
                 "consumes": [
@@ -935,7 +1019,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/auth": {
+        "/users/auth": {
             "post": {
                 "description": "Login a user with email and password",
                 "consumes": [
@@ -1031,12 +1115,44 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.CreateOrderRequest": {
+            "type": "object",
+            "required": [
+                "products"
+            ],
+            "properties": {
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.OrderProduct"
+                    }
+                }
+            }
+        },
+        "dto.CreateOrderResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateProductRequest": {
             "type": "object",
             "required": [
                 "description",
                 "name",
-                "price"
+                "price",
+                "stock"
             ],
             "properties": {
                 "description": {
@@ -1047,6 +1163,9 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1064,6 +1183,9 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1073,13 +1195,19 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "product_id": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OrderProduct"
+                    }
                 },
                 "status": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -1098,6 +1226,9 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1119,8 +1250,29 @@ const docTemplate = `{
         "dto.LoginUserResponse": {
             "type": "object",
             "properties": {
-                "token": {
+                "access_token": {
                     "type": "string"
+                },
+                "aceess_token_expires_at": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.OrderProduct": {
+            "type": "object",
+            "required": [
+                "product_id",
+                "quantity"
+            ],
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
                 }
             }
         },
@@ -1151,7 +1303,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateOrderRequest": {
+        "dto.UpdateOrderStatusRequest": {
             "type": "object",
             "required": [
                 "status"
@@ -1162,17 +1314,11 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateOrderResponse": {
+        "dto.UpdateOrderStatusResponse": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "string"
-                },
-                "product_id": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
                 },
                 "status": {
                     "type": "string"
@@ -1181,11 +1327,6 @@ const docTemplate = `{
         },
         "dto.UpdateProductRequest": {
             "type": "object",
-            "required": [
-                "description",
-                "name",
-                "price"
-            ],
             "properties": {
                 "description": {
                     "type": "string"
@@ -1195,6 +1336,9 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1212,6 +1356,9 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1230,18 +1377,40 @@ const docTemplate = `{
                     "type": "boolean"
                 }
             }
+        },
+        "models.OrderProduct": {
+            "type": "object",
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "description": "JWT security accessToken. Please add it in the format \"Bearer {AccessToken}\" to authorize your requests.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "scopes": {
+                "admin": "Grants read and write access to administrative information"
+            }
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "",
-	BasePath:         "",
-	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	BasePath:         "/api/v1",
+	Schemes:          []string{"http", "https"},
+	Title:            "Shopper Management API",
+	Description:      "A RESTful API for an e-commerce application. This API will handle basic CRUD operations for products and orders, and provide user management and authentication.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

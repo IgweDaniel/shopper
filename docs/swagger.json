@@ -1,22 +1,56 @@
 {
+    "schemes": [
+        "http",
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "A RESTful API for an e-commerce application. This API will handle basic CRUD operations for products and orders, and provide user management and authentication.",
+        "title": "Shopper Management API",
+        "contact": {
+            "name": "API Support Team",
+            "email": "support@petmanagement.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
     },
+    "basePath": "/api/v1",
     "paths": {
         "/orders": {
-            "get": {
-                "description": "Get a list of all orders",
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Create a new order",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "orders"
                 ],
-                "summary": "Get all orders",
+                "summary": "Create a new order",
+                "parameters": [
+                    {
+                        "description": "Order create request",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateOrderRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "allOf": [
                                 {
@@ -26,7 +60,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.GetOrderResponse"
+                                            "$ref": "#/definitions/dto.CreateOrderResponse"
                                         }
                                     }
                                 }
@@ -57,25 +91,21 @@
                 }
             }
         },
-        "/orders/{id}": {
+        "/orders/me": {
             "get": {
-                "description": "Get details of an order by ID",
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get all orders for authenticated user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "orders"
                 ],
-                "summary": "Get an order by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Order ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Get all orders for authenticated user",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -88,55 +118,10 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.GetOrderResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.ApiResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.GetOrderResponse"
                                             }
-                                        },
-                                        "message": {
-                                            "type": "string"
-                                        },
-                                        "success": {
-                                            "type": "boolean"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.ApiResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        },
-                                        "success": {
-                                            "type": "boolean"
                                         }
                                     }
                                 }
@@ -165,19 +150,23 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/orders/{id}/cancel": {
             "put": {
-                "description": "Update an order's details",
-                "consumes": [
-                    "application/json"
+                "security": [
+                    {
+                        "JWT": []
+                    }
                 ],
+                "description": "Cancel an order by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "orders"
                 ],
-                "summary": "Update an order",
+                "summary": "Cancel an order",
                 "parameters": [
                     {
                         "type": "string",
@@ -185,34 +174,13 @@
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Order update request",
-                        "name": "order",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.UpdateOrderRequest"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "204": {
+                        "description": "No Content",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.ApiResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.UpdateOrderResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ApiResponse"
                         }
                     },
                     "400": {
@@ -225,12 +193,6 @@
                                 {
                                     "type": "object",
                                     "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
-                                            }
-                                        },
                                         "message": {
                                             "type": "string"
                                         },
@@ -306,16 +268,23 @@
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "Delete an order by ID",
+            }
+        },
+        "/orders/{id}/status": {
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Update the status of an order by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "orders"
+                    "admin"
                 ],
-                "summary": "Delete an order",
+                "summary": "Update order status",
                 "parameters": [
                     {
                         "type": "string",
@@ -323,13 +292,34 @@
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Order status update request",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateOrderStatusRequest"
+                        }
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/helpers.ApiResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helpers.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.UpdateOrderStatusResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -342,12 +332,6 @@
                                 {
                                     "type": "object",
                                     "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
-                                            }
-                                        },
                                         "message": {
                                             "type": "string"
                                         },
@@ -427,12 +411,18 @@
         },
         "/products": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get all products",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "products",
+                    "admin"
                 ],
                 "summary": "Get all products",
                 "responses": {
@@ -481,6 +471,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Create a new product with name, description, and price",
                 "consumes": [
                     "application/json"
@@ -489,7 +484,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "admin"
                 ],
                 "summary": "Create a new product",
                 "parameters": [
@@ -616,7 +611,99 @@
             }
         },
         "/products/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get a product by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products",
+                    "admin"
+                ],
+                "summary": "Get a product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helpers.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetProductResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helpers.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "success": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helpers.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "success": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
             "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Update a product's name, description, and price",
                 "consumes": [
                     "application/json"
@@ -625,7 +712,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "admin"
                 ],
                 "summary": "Update a product",
                 "parameters": [
@@ -758,12 +845,17 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Delete a product by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "admin"
                 ],
                 "summary": "Delete a product",
                 "parameters": [
@@ -830,7 +922,7 @@
                 }
             }
         },
-        "/user": {
+        "/users": {
             "post": {
                 "description": "Register a new user with email and password",
                 "consumes": [
@@ -924,7 +1016,7 @@
                 }
             }
         },
-        "/user/auth": {
+        "/users/auth": {
             "post": {
                 "description": "Login a user with email and password",
                 "consumes": [
@@ -1020,12 +1112,44 @@
         }
     },
     "definitions": {
+        "dto.CreateOrderRequest": {
+            "type": "object",
+            "required": [
+                "products"
+            ],
+            "properties": {
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.OrderProduct"
+                    }
+                }
+            }
+        },
+        "dto.CreateOrderResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateProductRequest": {
             "type": "object",
             "required": [
                 "description",
                 "name",
-                "price"
+                "price",
+                "stock"
             ],
             "properties": {
                 "description": {
@@ -1036,6 +1160,9 @@
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1053,6 +1180,9 @@
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1062,13 +1192,19 @@
                 "id": {
                     "type": "string"
                 },
-                "product_id": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OrderProduct"
+                    }
                 },
                 "status": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -1087,6 +1223,9 @@
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1108,8 +1247,29 @@
         "dto.LoginUserResponse": {
             "type": "object",
             "properties": {
-                "token": {
+                "access_token": {
                     "type": "string"
+                },
+                "aceess_token_expires_at": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.OrderProduct": {
+            "type": "object",
+            "required": [
+                "product_id",
+                "quantity"
+            ],
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
                 }
             }
         },
@@ -1140,7 +1300,7 @@
                 }
             }
         },
-        "dto.UpdateOrderRequest": {
+        "dto.UpdateOrderStatusRequest": {
             "type": "object",
             "required": [
                 "status"
@@ -1151,17 +1311,11 @@
                 }
             }
         },
-        "dto.UpdateOrderResponse": {
+        "dto.UpdateOrderStatusResponse": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "string"
-                },
-                "product_id": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
                 },
                 "status": {
                     "type": "string"
@@ -1170,11 +1324,6 @@
         },
         "dto.UpdateProductRequest": {
             "type": "object",
-            "required": [
-                "description",
-                "name",
-                "price"
-            ],
             "properties": {
                 "description": {
                     "type": "string"
@@ -1184,6 +1333,9 @@
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1201,6 +1353,9 @@
                 },
                 "price": {
                     "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
                 }
             }
         },
@@ -1218,6 +1373,28 @@
                     "description": "Indicates whether the request was successful",
                     "type": "boolean"
                 }
+            }
+        },
+        "models.OrderProduct": {
+            "type": "object",
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "description": "JWT security accessToken. Please add it in the format \"Bearer {AccessToken}\" to authorize your requests.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "scopes": {
+                "admin": "Grants read and write access to administrative information"
             }
         }
     }

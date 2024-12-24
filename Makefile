@@ -60,6 +60,11 @@ swagger:
 	@echo "Generating Swagger documentation..."
 	swag init -g cmd/api/main.go
 
+## swagger: format comments
+.PHONY: swagger/fmt
+swagger/fmt:
+	@echo "Formatting Swagger comments..."
+	swag fmt
 
 ## migrations/create: create a database migration
 .PHONY: migrations/create
@@ -96,3 +101,10 @@ migrations/goto: confirm
 migrations/force: confirm
 	@echo "migrating database to version ${version}..."
 	@migrate -path ./migrations -database ${DB_URI} force ${version}
+
+
+## seed: Seed the database with initial data
+.PHONY: seed
+seed:
+	@echo "Seeding the database..."
+	@psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d $(DB_NAME) -f internal/repository/seeds/seed.sql

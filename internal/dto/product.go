@@ -5,6 +5,7 @@ type (
 		Name        string  `json:"name" validate:"required"`
 		Description string  `json:"description" validate:"required"`
 		Price       float64 `json:"price" validate:"required,gt=0"`
+		Stock       int     `json:"stock" validate:"required,gt=0"`
 	}
 
 	CreateProductResponse struct {
@@ -12,14 +13,16 @@ type (
 		Name        string  `json:"name"`
 		Description string  `json:"description"`
 		Price       float64 `json:"price"`
+		Stock       int     `json:"stock"`
 	}
 )
 
 type (
 	UpdateProductRequest struct {
-		Name        string  `json:"name" validate:"required"`
-		Description string  `json:"description" validate:"required"`
-		Price       float64 `json:"price" validate:"required,gt=0"`
+		Name        *string  `json:"name"`
+		Description *string  `json:"description"`
+		Price       *float64 `json:"price"`
+		Stock       *int     `json:"stock"`
 	}
 
 	UpdateProductResponse struct {
@@ -27,6 +30,7 @@ type (
 		Name        string  `json:"name"`
 		Description string  `json:"description"`
 		Price       float64 `json:"price"`
+		Stock       int     `json:"stock"`
 	}
 )
 
@@ -35,4 +39,5 @@ type GetProductResponse struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
+	Stock       int     `json:"stock"`
 }

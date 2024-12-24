@@ -1,31 +1,40 @@
 package dto
 
-type CreateOrderRequest struct {
-	ProductID string `json:"product_id" validate:"required"`
-	Quantity  int    `json:"quantity" validate:"required,gt=0"`
-}
+import "github.com/IgweDaniel/shopper/internal/models"
 
-type CreateOrderResponse struct {
-	ID        string `json:"id"`
-	ProductID string `json:"product_id"`
-	Quantity  int    `json:"quantity"`
-	Status    string `json:"status"`
-}
+type (
+	CreateOrderRequest struct {
+		Products []OrderProduct `json:"products" validate:"required,dive"`
+	}
+
+	OrderProduct struct {
+		ProductID string `json:"product_id" validate:"required,uuid"`
+		Quantity  int    `json:"quantity" validate:"required,gt=0"`
+	}
+
+	CreateOrderResponse struct {
+		ID          string  `json:"id"`
+		UserID      string  `json:"user_id"`
+		Status      string  `json:"status"`
+		TotalAmount float64 `json:"total_amount"`
+	}
+)
 
 type GetOrderResponse struct {
-	ID        string `json:"id"`
-	ProductID string `json:"product_id"`
-	Quantity  int    `json:"quantity"`
-	Status    string `json:"status"`
+	ID          string                `json:"id"`
+	UserID      string                `json:"user_id"`
+	Status      string                `json:"status"`
+	TotalAmount float64               `json:"total_amount"`
+	Products    []models.OrderProduct `json:"products"`
 }
 
-type UpdateOrderRequest struct {
-	Status string `json:"status" validate:"required"`
-}
+type (
+	UpdateOrderStatusRequest struct {
+		Status string `json:"status" validate:"required"`
+	}
 
-type UpdateOrderResponse struct {
-	ID        string `json:"id"`
-	ProductID string `json:"product_id"`
-	Quantity  int    `json:"quantity"`
-	Status    string `json:"status"`
-}
+	UpdateOrderStatusResponse struct {
+		ID     string `json:"id"`
+		Status string `json:"status"`
+	}
+)

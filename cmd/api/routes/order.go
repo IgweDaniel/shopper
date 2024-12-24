@@ -9,10 +9,7 @@ import (
 func (r *Router) registerOrderRoutes(handler *handlers.OrderHandler) {
 	orders := r.Echo.Group("orders")
 	orders.POST("", handler.CreateOrder, middleware.Authentication(r.App), middleware.ValidateDTO(&dto.CreateOrderRequest{}))
-	// FIXME: handler to get orders only admin can see and handler to get orders for authenticated user
 	orders.GET("/me", handler.GetOrders, middleware.Authentication(r.App))
-	// 	FIXME: this should handle canceling or changing order state by admin
-	orders.PUT("/:id", handler.UpdateOrder, middleware.Authentication(r.App), middleware.ValidateDTO(&dto.UpdateOrderRequest{}))
-	// TODO: handler to cancel an order
-	orders.DELETE("/:id", handler.CancelOrder)
+	orders.PUT("/:id/cancel", handler.CancelOrder, middleware.Authentication(r.App))
+	orders.PUT("/:id/status", handler.UpdateOrderStatus, middleware.RequireAdmin, middleware.Authentication(r.App), middleware.ValidateDTO(&dto.UpdateOrderStatusRequest{}))
 }

@@ -19,6 +19,8 @@ type (
 	}
 
 	LoginUserResponse struct {
-		Token string `json:"token"`
+		AccessToken          string `json:"access_token"`
+		RefreshToken         string `json:"refresh_token"`
+		AccessTokenExpiresAt int64  `json:"aceess_token_expires_at"`
 	}
 )

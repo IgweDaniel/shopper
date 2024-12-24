@@ -1,6 +1,8 @@
 package contracts
 
-import "github.com/IgweDaniel/shopper/internal/models"
+import (
+	"github.com/IgweDaniel/shopper/internal/models"
+)
 
 type Repositories struct {
 	User    UserRepository
@@ -21,12 +23,14 @@ type ProductRepository interface {
 	GetProducts() ([]models.Product, error)
 	UpdateProduct(product *models.Product) error
 	DeleteProduct(id string) error
+	UpdateUnderLock(productID string, updaterFunc func(product *models.Product) error) (*models.Product, error)
+	// GetProductForUpdate(tx *sql.Tx, productID string) (*models.Product, error)
 }
 
 type OrderRepository interface {
 	CreateOrder(order *models.Order) error
-	GetOrderByID(id string) (*models.Order, error)
+	GetOrderByID(id string) (models.Order, error)
 	GetUserOrders(userID string) ([]models.Order, error)
-	UpdateOrder(order *models.Order) error
+	UpdateOrderStatus(id string, status models.OrderStatus) error
 	DeleteOrder(id string) error
 }

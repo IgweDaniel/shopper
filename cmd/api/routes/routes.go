@@ -18,10 +18,10 @@ import (
 
 type Router struct {
 	App  *internal.Application
-	Echo *echo.Echo
+	Echo *echo.Group
 }
 
-func NewRouter(app *internal.Application, e *echo.Echo) *Router {
+func NewRouter(app *internal.Application, e *echo.Group) *Router {
 	return &Router{
 		App:  app,
 		Echo: e,
@@ -65,7 +65,8 @@ func RegisterRoutes(app *internal.Application, db database.Service, services *co
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	router := NewRouter(app, e)
+	api := e.Group("/api/v1/")
+	router := NewRouter(app, api)
 
 	router.registerUserRoutes(handlers.NewUserHandler(services.User))
 	router.registerOrderRoutes(handlers.NewOrderHandler(services.Order))

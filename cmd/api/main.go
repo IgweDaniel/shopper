@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -36,6 +37,22 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 	done <- true
 }
 
+// Swagger
+//
+//	@title						Shopper Management API
+//	@version					1.0
+//	@description				A RESTful API for an e-commerce application. This API will handle basic CRUD operations for products and orders, and provide user management and authentication.
+//	@contact.name				API Support Team
+//	@contact.email				support@petmanagement.com
+//	@license.name				Apache 2.0
+//	@license.url				http://www.apache.org/licenses/LICENSE-2.0.html
+//	@BasePath					/api/v1
+//	@schemes					http https
+//	@securityDefinitions.apiKey	JWT
+//	@in							header
+//	@name						Authorization
+//	@description				JWT security accessToken. Please add it in the format "Bearer {AccessToken}" to authorize your requests.
+//	@scope.admin				Grants read and write access to administrative information
 func main() {
 
 	server := server.NewServer()
@@ -55,4 +72,5 @@ func main() {
 	// Wait for the graceful shutdown to complete
 	<-done
 	log.Println("Graceful shutdown complete.")
+	os.Exit(0)
 }

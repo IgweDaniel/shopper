@@ -19,16 +19,16 @@ func NewUserHandler(service contracts.UserService) *UserHandler {
 }
 
 // Register godoc
-// @Summary Register a new user
-// @Description Register a new user with email and password
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param user body dto.RegisterUserRequest true "User registration request"
-// @Success 201 {object}  helpers.ApiResponse{data=dto.RegisterUserResponse}
-// @Failure 400 {object} helpers.ApiResponse{message=string,success=bool,data=map[string]string}
-// @Failure 500 {object} helpers.ApiResponse{message=string,success=bool}
-// @Router /user [post]
+//	@Summary		Register a new user
+//	@Description	Register a new user with email and password
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		dto.RegisterUserRequest	true	"User registration request"
+//	@Success		201		{object}	helpers.ApiResponse{data=dto.RegisterUserResponse}
+//	@Failure		400		{object}	helpers.ApiResponse{message=string,success=bool,data=map[string]string}
+//	@Failure		500		{object}	helpers.ApiResponse{message=string,success=bool}
+//	@Router			/users [post]
 func (h *UserHandler) Register(c echo.Context) error {
 	req := c.Get("validatedDTO").(*dto.RegisterUserRequest)
 	resp, err := h.Service.RegisterUser(req)
@@ -40,16 +40,16 @@ func (h *UserHandler) Register(c echo.Context) error {
 }
 
 // Login godoc
-// @Summary Login a user
-// @Description Login a user with email and password
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param user body dto.LoginUserRequest true "User login request"
-// @Success 201 {object}  helpers.ApiResponse{data=dto.LoginUserResponse}
-// @Failure 400 {object} helpers.ApiResponse{message=string,success=bool,data=map[string]string}
-// @Failure 500 {object} helpers.ApiResponse{message=string,success=bool}
-// @Router /user/auth [post]
+//	@Summary		Login a user
+//	@Description	Login a user with email and password
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		dto.LoginUserRequest	true	"User login request"	SchemaExample(Subject: Testmail\r\n\r\nBody Message\r\n)
+//	@Success		201		{object}	helpers.ApiResponse{data=dto.LoginUserResponse}
+//	@Failure		400		{object}	helpers.ApiResponse{message=string,success=bool,data=map[string]string}
+//	@Failure		500		{object}	helpers.ApiResponse{message=string,success=bool}
+//	@Router			/users/auth [post]
 func (h *UserHandler) Login(c echo.Context) error {
 	req := c.Get("validatedDTO").(*dto.LoginUserRequest)
 

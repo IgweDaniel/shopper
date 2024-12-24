@@ -23,7 +23,7 @@ func ContextGetUser(ctx echo.Context) models.User {
 	}
 
 	return models.User{
-		ID:      claims.ID,
+		ID:      claims.Id,
 		IsAdmin: claims.IsAdmin,
 	}
 }

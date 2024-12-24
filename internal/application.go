@@ -13,8 +13,7 @@ type Config struct {
 		Access  string `env:"JWT_ACCESS,required"`
 		Refresh string `env:"JWT_REFRESH,required"`
 	}
-	DbUri string `env:"DB_URI,required"`
-	Env   string `env:"ENV,required"`
+	Env string `env:"APP_ENV,required"`
 
 	DbHost     string `env:"DB_HOST,required"`
 	DbPort     string `env:"DB_PORT,required"`

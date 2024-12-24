@@ -8,6 +8,7 @@ import (
 var (
 	ErrNotFound      = errors.New("not found")
 	ErrNotAuthorized = errors.New("not authorized")
+	ErrForbidden     = errors.New("forbidden")
 	ErrDuplicatedKey = errors.New("duplicate entity")
 	ErrBadRequest    = errors.New("bad request")
 	ErrCacheMiss     = errors.New("cache miss")

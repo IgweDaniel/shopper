@@ -26,12 +26,13 @@ func HandleError(ctx echo.Context, err error, customErrorResponse ...interface{}
 		ctx.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, buildErrorResponse("internal server error", nil))
 	}
-	// err = errors.Unwrap(err)
 	var statusCode int
 	switch err {
 	case internal.ErrNotFound:
 		statusCode = http.StatusNotFound
 	case internal.ErrNotAuthorized:
+		statusCode = http.StatusUnauthorized
+	case internal.ErrForbidden:
 		statusCode = http.StatusForbidden
 	case internal.ErrBadRequest:
 		statusCode = http.StatusBadRequest

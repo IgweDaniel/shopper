@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"net/http"
-
 	"github.com/IgweDaniel/shopper/cmd/api/helpers"
 	"github.com/IgweDaniel/shopper/internal"
 	"github.com/golang-jwt/jwt/v5"
@@ -16,6 +14,10 @@ func Authentication(app *internal.Application) echo.MiddlewareFunc {
 			return new(helpers.CustomAccessJwtClaims)
 		},
 		SigningKey: []byte(app.Config.Jwt.Access),
+		ErrorHandler: func(c echo.Context, err error) error {
+			return helpers.HandleError(c, internal.WrapErrorMessage(internal.ErrNotAuthorized, "unauthorized"))
+
+		},
 	})
 }
 
@@ -23,10 +25,7 @@ func RequireAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		user := helpers.ContextGetUser(ctx)
 		if !user.IsAdmin {
-			return &echo.HTTPError{
-				Code:    http.StatusForbidden,
-				Message: "user has insufficient privileges",
-			}
+			return helpers.HandleError(ctx, internal.WrapErrorMessage(internal.ErrForbidden, "admin privilege required"))
 		}
 
 		return next(ctx)

@@ -20,6 +20,7 @@ func (s *ProductService) CreateProduct(req *dto.CreateProductRequest) (dto.Creat
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
+		Stock:       req.Stock,
 	}
 
 	err := s.app.Repositories.Product.CreateProduct(&product)
@@ -32,20 +33,28 @@ func (s *ProductService) CreateProduct(req *dto.CreateProductRequest) (dto.Creat
 		Name:        product.Name,
 		Description: product.Description,
 		Price:       product.Price,
+		Stock:       product.Stock,
 	}, nil
 }
 
 func (s *ProductService) UpdateProduct(id string, req *dto.UpdateProductRequest) (dto.UpdateProductResponse, error) {
-	product, err := s.app.Repositories.Product.GetProductByID(id)
-	if err != nil {
-		return dto.UpdateProductResponse{}, err
-	}
+	product, err := s.app.Repositories.Product.UpdateUnderLock(id, func(product *models.Product) error {
 
-	product.Name = req.Name
-	product.Description = req.Description
-	product.Price = req.Price
+		if req.Name != nil {
+			product.Name = *req.Name
+		}
+		if req.Description != nil {
+			product.Description = *req.Description
+		}
+		if req.Price != nil {
+			product.Price = *req.Price
+		}
+		if req.Stock != nil {
+			product.Stock = *req.Stock
+		}
 
-	err = s.app.Repositories.Product.UpdateProduct(product)
+		return nil
+	})
 	if err != nil {
 		return dto.UpdateProductResponse{}, err
 	}
@@ -55,6 +64,7 @@ func (s *ProductService) UpdateProduct(id string, req *dto.UpdateProductRequest)
 		Name:        product.Name,
 		Description: product.Description,
 		Price:       product.Price,
+		Stock:       product.Stock,
 	}, nil
 }
 

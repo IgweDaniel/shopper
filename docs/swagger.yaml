@@ -1,4 +1,25 @@
+basePath: /api/v1
 definitions:
+  dto.CreateOrderRequest:
+    properties:
+      products:
+        items:
+          $ref: '#/definitions/dto.OrderProduct'
+        type: array
+    required:
+    - products
+    type: object
+  dto.CreateOrderResponse:
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+      total_amount:
+        type: number
+      user_id:
+        type: string
+    type: object
   dto.CreateProductRequest:
     properties:
       description:
@@ -7,10 +28,13 @@ definitions:
         type: string
       price:
         type: number
+      stock:
+        type: integer
     required:
     - description
     - name
     - price
+    - stock
     type: object
   dto.CreateProductResponse:
     properties:
@@ -22,16 +46,22 @@ definitions:
         type: string
       price:
         type: number
+      stock:
+        type: integer
     type: object
   dto.GetOrderResponse:
     properties:
       id:
         type: string
-      product_id:
-        type: string
-      quantity:
-        type: integer
+      products:
+        items:
+          $ref: '#/definitions/models.OrderProduct'
+        type: array
       status:
+        type: string
+      total_amount:
+        type: number
+      user_id:
         type: string
     type: object
   dto.GetProductResponse:
@@ -44,6 +74,8 @@ definitions:
         type: string
       price:
         type: number
+      stock:
+        type: integer
     type: object
   dto.LoginUserRequest:
     properties:
@@ -57,8 +89,22 @@ definitions:
     type: object
   dto.LoginUserResponse:
     properties:
-      token:
+      access_token:
         type: string
+      aceess_token_expires_at:
+        type: integer
+      refresh_token:
+        type: string
+    type: object
+  dto.OrderProduct:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    required:
+    - product_id
+    - quantity
     type: object
   dto.RegisterUserRequest:
     properties:
@@ -78,21 +124,17 @@ definitions:
       id:
         type: string
     type: object
-  dto.UpdateOrderRequest:
+  dto.UpdateOrderStatusRequest:
     properties:
       status:
         type: string
     required:
     - status
     type: object
-  dto.UpdateOrderResponse:
+  dto.UpdateOrderStatusResponse:
     properties:
       id:
         type: string
-      product_id:
-        type: string
-      quantity:
-        type: integer
       status:
         type: string
     type: object
@@ -104,10 +146,8 @@ definitions:
         type: string
       price:
         type: number
-    required:
-    - description
-    - name
-    - price
+      stock:
+        type: integer
     type: object
   dto.UpdateProductResponse:
     properties:
@@ -119,6 +159,8 @@ definitions:
         type: string
       price:
         type: number
+      stock:
+        type: integer
     type: object
   helpers.ApiResponse:
     properties:
@@ -131,23 +173,48 @@ definitions:
         description: Indicates whether the request was successful
         type: boolean
     type: object
+  models.OrderProduct:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    type: object
 info:
-  contact: {}
+  contact:
+    email: support@petmanagement.com
+    name: API Support Team
+  description: A RESTful API for an e-commerce application. This API will handle basic
+    CRUD operations for products and orders, and provide user management and authentication.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Shopper Management API
+  version: "1.0"
 paths:
   /orders:
-    get:
-      description: Get a list of all orders
+    post:
+      consumes:
+      - application/json
+      description: Create a new order
+      parameters:
+      - description: Order create request
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateOrderRequest'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             allOf:
             - $ref: '#/definitions/helpers.ApiResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.GetOrderResponse'
+                  $ref: '#/definitions/dto.CreateOrderResponse'
               type: object
         "500":
           description: Internal Server Error
@@ -160,12 +227,14 @@ paths:
                 success:
                   type: boolean
               type: object
-      summary: Get all orders
+      security:
+      - JWT: []
+      summary: Create a new order
       tags:
       - orders
-  /orders/{id}:
-    delete:
-      description: Delete an order by ID
+  /orders/{id}/cancel:
+    put:
+      description: Cancel an order by ID
       parameters:
       - description: Order ID
         in: path
@@ -185,10 +254,6 @@ paths:
             allOf:
             - $ref: '#/definitions/helpers.ApiResponse'
             - properties:
-                data:
-                  additionalProperties:
-                    type: string
-                  type: object
                 message:
                   type: string
                 success:
@@ -227,85 +292,26 @@ paths:
                 success:
                   type: boolean
               type: object
-      summary: Delete an order
+      security:
+      - JWT: []
+      summary: Cancel an order
       tags:
       - orders
-    get:
-      description: Get details of an order by ID
-      parameters:
-      - description: Order ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.ApiResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.GetOrderResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.ApiResponse'
-            - properties:
-                data:
-                  additionalProperties:
-                    type: string
-                  type: object
-                message:
-                  type: string
-                success:
-                  type: boolean
-              type: object
-        "404":
-          description: Not Found
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.ApiResponse'
-            - properties:
-                message:
-                  type: string
-                success:
-                  type: boolean
-              type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.ApiResponse'
-            - properties:
-                message:
-                  type: string
-                success:
-                  type: boolean
-              type: object
-      summary: Get an order by ID
-      tags:
-      - orders
+  /orders/{id}/status:
     put:
-      consumes:
-      - application/json
-      description: Update an order's details
+      description: Update the status of an order by ID
       parameters:
       - description: Order ID
         in: path
         name: id
         required: true
         type: string
-      - description: Order update request
+      - description: Order status update request
         in: body
-        name: order
+        name: status
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateOrderRequest'
+          $ref: '#/definitions/dto.UpdateOrderStatusRequest'
       produces:
       - application/json
       responses:
@@ -316,7 +322,7 @@ paths:
             - $ref: '#/definitions/helpers.ApiResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.UpdateOrderResponse'
+                  $ref: '#/definitions/dto.UpdateOrderStatusResponse'
               type: object
         "400":
           description: Bad Request
@@ -324,10 +330,6 @@ paths:
             allOf:
             - $ref: '#/definitions/helpers.ApiResponse'
             - properties:
-                data:
-                  additionalProperties:
-                    type: string
-                  type: object
                 message:
                   type: string
                 success:
@@ -366,7 +368,42 @@ paths:
                 success:
                   type: boolean
               type: object
-      summary: Update an order
+      security:
+      - JWT: []
+      summary: Update order status
+      tags:
+      - admin
+  /orders/me:
+    get:
+      description: Get all orders for authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.ApiResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.GetOrderResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.ApiResponse'
+            - properties:
+                message:
+                  type: string
+                success:
+                  type: boolean
+              type: object
+      security:
+      - JWT: []
+      summary: Get all orders for authenticated user
       tags:
       - orders
   /products:
@@ -397,9 +434,12 @@ paths:
                 success:
                   type: boolean
               type: object
+      security:
+      - JWT: []
       summary: Get all products
       tags:
       - products
+      - admin
     post:
       consumes:
       - application/json
@@ -471,9 +511,11 @@ paths:
                 success:
                   type: boolean
               type: object
+      security:
+      - JWT: []
       summary: Create a new product
       tags:
-      - products
+      - admin
   /products/{id}:
     delete:
       description: Delete a product by ID
@@ -514,9 +556,59 @@ paths:
                 success:
                   type: boolean
               type: object
+      security:
+      - JWT: []
       summary: Delete a product
       tags:
+      - admin
+    get:
+      description: Get a product by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetProductResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.ApiResponse'
+            - properties:
+                message:
+                  type: string
+                success:
+                  type: boolean
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.ApiResponse'
+            - properties:
+                message:
+                  type: string
+                success:
+                  type: boolean
+              type: object
+      security:
+      - JWT: []
+      summary: Get a product
+      tags:
       - products
+      - admin
     put:
       consumes:
       - application/json
@@ -593,10 +685,12 @@ paths:
                 success:
                   type: boolean
               type: object
+      security:
+      - JWT: []
       summary: Update a product
       tags:
-      - products
-  /user:
+      - admin
+  /users:
     post:
       consumes:
       - application/json
@@ -649,7 +743,7 @@ paths:
       summary: Register a new user
       tags:
       - users
-  /user/auth:
+  /users/auth:
     post:
       consumes:
       - application/json
@@ -702,4 +796,16 @@ paths:
       summary: Login a user
       tags:
       - users
+schemes:
+- http
+- https
+securityDefinitions:
+  JWT:
+    description: JWT security accessToken. Please add it in the format "Bearer {AccessToken}"
+      to authorize your requests.
+    in: header
+    name: Authorization
+    scopes:
+      admin: Grants read and write access to administrative information
+    type: apiKey
 swagger: "2.0"

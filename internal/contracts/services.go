@@ -22,9 +22,9 @@ type ProductService interface {
 }
 
 type OrderService interface {
-	CreateOrder(req *dto.CreateOrderRequest) (dto.CreateOrderResponse, error)
-	UpdateOrder(id string, req *dto.UpdateOrderRequest) (dto.UpdateOrderResponse, error)
-	GetOrderByID(id string) (dto.GetOrderResponse, error)
+	CreateOrder(userId string, req *dto.CreateOrderRequest) (dto.CreateOrderResponse, error)
+	UpdateOrderStatus(id string, req *dto.UpdateOrderStatusRequest) (dto.UpdateOrderStatusResponse, error)
+	// GetOrderByID(id string) (dto.GetOrderResponse, error)
 	GetOrders(userId string) ([]dto.GetOrderResponse, error)
-	CancelOrder(id string) error
+	CancelOrder(id, userID string) error
 }
