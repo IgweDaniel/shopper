@@ -8,6 +8,8 @@ type Repositories struct {
 	Product ProductRepository
 }
 
+// FIXME: CRUD for each model, add pagination and filtering (order and product)
+
 type UserRepository interface {
 	CreateUser(user *models.User) error
 	GetUserByEmail(email string) (*models.User, error)

@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/IgweDaniel/shopper/cmd/api/helpers"
 	"github.com/IgweDaniel/shopper/internal/contracts"
 	"github.com/IgweDaniel/shopper/internal/dto"
 
@@ -13,6 +14,10 @@ type UserHandler struct {
 	Service contracts.UserService
 }
 
+func NewUserHandler(service contracts.UserService) *UserHandler {
+	return &UserHandler{Service: service}
+}
+
 // Register godoc
 // @Summary Register a new user
 // @Description Register a new user with email and password
@@ -20,18 +25,18 @@ type UserHandler struct {
 // @Accept json
 // @Produce json
 // @Param user body dto.RegisterUserRequest true "User registration request"
-// @Success 201 {object} dto.RegisterUserResponse
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Success 201 {object}  helpers.ApiResponse{data=dto.RegisterUserResponse}
+// @Failure 400 {object} helpers.ApiResponse{message=string,success=bool,data=map[string]string}
+// @Failure 500 {object} helpers.ApiResponse{message=string,success=bool}
 // @Router /user [post]
 func (h *UserHandler) Register(c echo.Context) error {
 	req := c.Get("validatedDTO").(*dto.RegisterUserRequest)
 	resp, err := h.Service.RegisterUser(req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return helpers.HandleError(c, err)
 	}
 
-	return c.JSON(http.StatusCreated, resp)
+	return c.JSON(http.StatusCreated, helpers.BuildResponse("account created", resp))
 }
 
 // Login godoc
@@ -41,17 +46,17 @@ func (h *UserHandler) Register(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param user body dto.LoginUserRequest true "User login request"
-// @Success 200 {object} dto.LoginUserResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
+// @Success 201 {object}  helpers.ApiResponse{data=dto.LoginUserResponse}
+// @Failure 400 {object} helpers.ApiResponse{message=string,success=bool,data=map[string]string}
+// @Failure 500 {object} helpers.ApiResponse{message=string,success=bool}
 // @Router /user/auth [post]
 func (h *UserHandler) Login(c echo.Context) error {
 	req := c.Get("validatedDTO").(*dto.LoginUserRequest)
 
 	resp, err := h.Service.LoginUser(req)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
+		return helpers.HandleError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, helpers.BuildResponse("auth successful", resp))
 }

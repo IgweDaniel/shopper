@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Authentication(app internal.Application) echo.MiddlewareFunc {
+func Authentication(app *internal.Application) echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return new(helpers.CustomAccessJwtClaims)

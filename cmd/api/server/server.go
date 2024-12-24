@@ -30,8 +30,8 @@ func NewServer() *http.Server {
 	}
 
 	app := internal.Application{
-		Config:       cfg,
-		Repositories: repos,
+		Config:       &cfg,
+		Repositories: &repos,
 	}
 	services := contracts.Services{
 		User:    services.NewUserService(&app),
@@ -41,7 +41,7 @@ func NewServer() *http.Server {
 	// Declare Server config
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		Handler:      routes.RegisterRoutes(db, &services),
+		Handler:      routes.RegisterRoutes(&app, db, &services),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

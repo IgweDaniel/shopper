@@ -4,15 +4,13 @@ import (
 	"github.com/IgweDaniel/shopper/cmd/api/handlers"
 	"github.com/IgweDaniel/shopper/cmd/api/middleware"
 	"github.com/IgweDaniel/shopper/internal/dto"
-
-	"github.com/labstack/echo/v4"
 )
 
-func registerProductRoutes(e *echo.Echo, handler *handlers.ProductHandler) {
+func (r *Router) registerProductRoutes(handler *handlers.ProductHandler) {
 
-	products := e.Group("products")
-	products.POST("", handler.CreateProduct, middleware.ValidateDTO(&dto.CreateProductRequest{}))
+	products := r.Echo.Group("products")
 	products.GET("", handler.GetProducts)
-	products.PUT("/:id", handler.UpdateProduct, middleware.ValidateDTO(&dto.UpdateProductRequest{}))
-	products.DELETE("/:id", handler.DeleteProduct)
+	products.POST("", handler.CreateProduct, middleware.Authentication(r.App), middleware.RequireAdmin, middleware.ValidateDTO(&dto.CreateProductRequest{}))
+	products.PUT("/:id", handler.UpdateProduct, middleware.Authentication(r.App), middleware.RequireAdmin, middleware.ValidateDTO(&dto.UpdateProductRequest{}))
+	products.DELETE("/:id", handler.DeleteProduct, middleware.Authentication(r.App), middleware.RequireAdmin)
 }

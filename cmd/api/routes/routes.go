@@ -5,6 +5,7 @@ import (
 
 	"github.com/IgweDaniel/shopper/cmd/api/handlers"
 	"github.com/IgweDaniel/shopper/cmd/api/helpers"
+	"github.com/IgweDaniel/shopper/internal"
 	"github.com/IgweDaniel/shopper/internal/contracts"
 	"github.com/IgweDaniel/shopper/internal/database"
 
@@ -15,7 +16,19 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
-func RegisterRoutes(db database.Service, services *contracts.Services) http.Handler {
+type Router struct {
+	App  *internal.Application
+	Echo *echo.Echo
+}
+
+func NewRouter(app *internal.Application, e *echo.Echo) *Router {
+	return &Router{
+		App:  app,
+		Echo: e,
+	}
+}
+
+func RegisterRoutes(app *internal.Application, db database.Service, services *contracts.Services) http.Handler {
 	e := echo.New()
 	var whiteList = []string{"*"}
 
@@ -52,13 +65,11 @@ func RegisterRoutes(db database.Service, services *contracts.Services) http.Hand
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	userHandler := &handlers.UserHandler{Service: services.User}
-	orderHandler := &handlers.OrderHandler{Service: services.Order}
-	productHandler := &handlers.ProductHandler{Service: services.Product}
+	router := NewRouter(app, e)
 
-	registerUserRoutes(e, userHandler)
-	registerOrderRoutes(e, orderHandler)
-	registerProductRoutes(e, productHandler)
+	router.registerUserRoutes(handlers.NewUserHandler(services.User))
+	router.registerOrderRoutes(handlers.NewOrderHandler(services.Order))
+	router.registerProductRoutes(handlers.NewProductHandler(services.Product))
 
 	e.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, db.Health())

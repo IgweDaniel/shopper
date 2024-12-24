@@ -7,6 +7,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type ApiResponse struct {
+	// Indicates whether the request was successful
+	Success bool `json:"success"`
+	// A message providing additional information about the response
+	Message string `json:"message"`
+	// The data returned by the API
+	Data interface{} `json:"data"`
+}
+
 func HandleError(ctx echo.Context, err error, customErrorResponse ...interface{}) *echo.HTTPError {
 	var context string
 
@@ -45,18 +54,18 @@ func HandleError(ctx echo.Context, err error, customErrorResponse ...interface{}
 	return echo.NewHTTPError(statusCode, buildErrorResponse(context, nil))
 }
 
-func buildErrorResponse(respMessage string, respData interface{}) echo.Map {
+func buildErrorResponse(respMessage string, respData interface{}) ApiResponse {
 	return buildResponse(false, respMessage, respData)
 }
 
-func BuildResponse(respMessage string, respData interface{}) echo.Map {
+func BuildResponse(respMessage string, respData interface{}) ApiResponse {
 	return buildResponse(true, respMessage, respData)
 }
 
-func buildResponse(success bool, respMessage string, respData interface{}) echo.Map {
-	return echo.Map{
-		"success": success,
-		"message": respMessage,
-		"data":    respData,
+func buildResponse(success bool, respMessage string, respData interface{}) ApiResponse {
+	return ApiResponse{
+		Success: success,
+		Message: respMessage,
+		Data:    respData,
 	}
 }
