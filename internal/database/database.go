@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/IgweDaniel/shopper/internal"
+	"github.com/IgweDaniel/shopper/internal/config"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -35,7 +35,7 @@ var (
 	dbInstance *service
 )
 
-func New(cfg internal.Config) Service {
+func New(cfg config.Config) Service {
 	if dbInstance != nil {
 		return dbInstance
 	}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/IgweDaniel/shopper/cmd/api/routes"
 	"github.com/IgweDaniel/shopper/internal"
+	"github.com/IgweDaniel/shopper/internal/config"
 	"github.com/IgweDaniel/shopper/internal/contracts"
 	"github.com/IgweDaniel/shopper/internal/database"
 	"github.com/IgweDaniel/shopper/internal/repository"
@@ -17,7 +18,7 @@ import (
 
 func NewServer() *http.Server {
 
-	cfg, err := internal.LoadConfig()
+	cfg, err := config.LoadConfig()
 	db := database.New(cfg)
 	if err != nil {
 		panic(fmt.Sprintf("failed to load config: %v", err))
