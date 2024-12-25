@@ -4,10 +4,16 @@ import (
 	"github.com/IgweDaniel/shopper/internal/models"
 )
 
-type Repositories struct {
-	User    UserRepository
-	Order   OrderRepository
-	Product ProductRepository
+type Transaction interface {
+	Commit() error
+	Rollback() error
+}
+
+type Repositories interface {
+	BeginTransaction() (Transaction, error)
+	Product() ProductRepository
+	Order() OrderRepository
+	User() UserRepository
 }
 
 // FIXME: CRUD for each model, add pagination and filtering (order and product)
@@ -23,12 +29,12 @@ type ProductRepository interface {
 	GetProducts() ([]models.Product, error)
 	UpdateProduct(product *models.Product) error
 	DeleteProduct(id string) error
-	UpdateUnderLock(productID string, updaterFunc func(product *models.Product) error) (*models.Product, error)
-	// GetProductForUpdate(tx *sql.Tx, productID string) (*models.Product, error)
+	UpdateProductStock(tx Transaction, productID string, quantity int) (*models.Product, error)
+	Update(id string, updates map[string]interface{}) error
 }
 
 type OrderRepository interface {
-	CreateOrder(order *models.Order) error
+	CreateOrder(tx Transaction, order *models.Order) error
 	GetOrderByID(id string) (models.Order, error)
 	GetUserOrders(userID string) ([]models.Order, error)
 	UpdateOrderStatus(id string, status models.OrderStatus) error

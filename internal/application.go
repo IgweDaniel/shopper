@@ -41,5 +41,5 @@ func LoadConfig() (Config, error) {
 
 type Application struct {
 	Config       *Config
-	Repositories *contracts.Repositories
+	Repositories contracts.Repositories
 }

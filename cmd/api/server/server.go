@@ -23,15 +23,13 @@ func NewServer() *http.Server {
 		panic(fmt.Sprintf("failed to load config: %v", err))
 	}
 
-	repos := contracts.Repositories{
-		User:    repository.NewPostgresUserRepository(db.DB()),
-		Order:   repository.NewPostgresOrderRepository(db.DB()),
-		Product: repository.NewPostgresProductRepository(db.DB()),
+	repos := &repository.PostgresRepository{
+		DB: db.DB(),
 	}
 
 	app := internal.Application{
 		Config:       &cfg,
-		Repositories: &repos,
+		Repositories: repos,
 	}
 	services := contracts.Services{
 		User:    services.NewUserService(&app),

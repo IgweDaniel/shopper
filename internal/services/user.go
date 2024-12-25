@@ -29,7 +29,7 @@ func (s *UserService) RegisterUser(req *dto.RegisterUserRequest) (dto.RegisterUs
 		PasswordHash: PasswordHash, // In a real application, make sure to hash the password
 	}
 
-	err = s.app.Repositories.User.CreateUser(&user)
+	err = s.app.Repositories.User().CreateUser(&user)
 	if err != nil {
 		if errors.Is(err, internal.ErrDuplicatedKey) {
 			return dto.RegisterUserResponse{}, internal.WrapErrorMessage(err, "email already exists")
@@ -44,7 +44,7 @@ func (s *UserService) RegisterUser(req *dto.RegisterUserRequest) (dto.RegisterUs
 }
 
 func (s *UserService) LoginUser(req *dto.LoginUserRequest) (dto.LoginUserResponse, error) {
-	user, err := s.app.Repositories.User.GetUserByEmail(req.Email)
+	user, err := s.app.Repositories.User().GetUserByEmail(req.Email)
 	if err != nil {
 		if errors.Is(err, internal.ErrNotFound) {
 			return dto.LoginUserResponse{}, internal.WrapErrorMessage(internal.ErrNotAuthorized, "invalid credentials")

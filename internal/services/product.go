@@ -23,7 +23,7 @@ func (s *ProductService) CreateProduct(req *dto.CreateProductRequest) (dto.Creat
 		Stock:       req.Stock,
 	}
 
-	err := s.app.Repositories.Product.CreateProduct(&product)
+	err := s.app.Repositories.Product().CreateProduct(&product)
 	if err != nil {
 		return dto.CreateProductResponse{}, err
 	}
@@ -38,23 +38,24 @@ func (s *ProductService) CreateProduct(req *dto.CreateProductRequest) (dto.Creat
 }
 
 func (s *ProductService) UpdateProduct(id string, req *dto.UpdateProductRequest) (dto.UpdateProductResponse, error) {
-	product, err := s.app.Repositories.Product.UpdateUnderLock(id, func(product *models.Product) error {
 
-		if req.Name != nil {
-			product.Name = *req.Name
-		}
-		if req.Description != nil {
-			product.Description = *req.Description
-		}
-		if req.Price != nil {
-			product.Price = *req.Price
-		}
-		if req.Stock != nil {
-			product.Stock = *req.Stock
-		}
+	var product models.Product
 
-		return nil
-	})
+	var updates = make(map[string]interface{})
+	if req.Name != nil {
+
+		updates["name"] = *req.Name
+	}
+	if req.Description != nil {
+		updates["description"] = *req.Description
+	}
+	if req.Price != nil {
+		updates["price"] = *req.Price
+	}
+	if req.Stock != nil {
+		updates["stock"] = *req.Stock
+	}
+	err := s.app.Repositories.Product().Update(id, updates)
 	if err != nil {
 		return dto.UpdateProductResponse{}, err
 	}
@@ -69,7 +70,7 @@ func (s *ProductService) UpdateProduct(id string, req *dto.UpdateProductRequest)
 }
 
 func (s *ProductService) GetProductByID(id string) (dto.GetProductResponse, error) {
-	product, err := s.app.Repositories.Product.GetProductByID(id)
+	product, err := s.app.Repositories.Product().GetProductByID(id)
 	if err != nil {
 		return dto.GetProductResponse{}, err
 	}
@@ -83,7 +84,7 @@ func (s *ProductService) GetProductByID(id string) (dto.GetProductResponse, erro
 }
 
 func (s *ProductService) GetProducts() ([]dto.GetProductResponse, error) {
-	products, err := s.app.Repositories.Product.GetProducts()
+	products, err := s.app.Repositories.Product().GetProducts()
 	if err != nil {
 		return nil, err
 	}
@@ -102,5 +103,5 @@ func (s *ProductService) GetProducts() ([]dto.GetProductResponse, error) {
 }
 
 func (s *ProductService) DeleteProduct(id string) error {
-	return s.app.Repositories.Product.DeleteProduct(id)
+	return s.app.Repositories.Product().DeleteProduct(id)
 }

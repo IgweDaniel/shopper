@@ -1,8 +1,6 @@
 package services
 
 import (
-	"errors"
-
 	"github.com/IgweDaniel/shopper/internal"
 	"github.com/IgweDaniel/shopper/internal/contracts"
 	"github.com/IgweDaniel/shopper/internal/dto"
@@ -24,24 +22,19 @@ func (s *OrderService) CreateOrder(userId string, req *dto.CreateOrderRequest) (
 		Status: models.OrderStatusPending,
 	}
 
+	tx, err := s.app.Repositories.BeginTransaction()
+	if err != nil {
+		return dto.CreateOrderResponse{}, err
+	}
+	defer tx.Rollback()
+
 	for _, orderProduct := range req.Products {
-		_, err := s.app.Repositories.Product.UpdateUnderLock(orderProduct.ProductID, func(product *models.Product) error {
-			if product.Stock < orderProduct.Quantity {
-				return internal.WrapErrorMessage(internal.ErrBadRequest, "insufficient stock")
-			}
-
-			product.Stock -= orderProduct.Quantity
-			totalAmount += product.Price * float64(orderProduct.Quantity)
-			return nil
-		})
-
+		product, err := s.app.Repositories.Product().UpdateProductStock(tx, orderProduct.ProductID, orderProduct.Quantity)
 		if err != nil {
-			if errors.Is(err, internal.ErrNotFound) {
-				return dto.CreateOrderResponse{}, internal.WrapErrorMessage(err, "product not found")
-			}
 			return dto.CreateOrderResponse{}, err
 		}
 
+		totalAmount += product.Price * float64(orderProduct.Quantity)
 		order.Products = append(order.Products, models.OrderProduct{
 			ProductID: orderProduct.ProductID,
 			Quantity:  orderProduct.Quantity,
@@ -49,7 +42,13 @@ func (s *OrderService) CreateOrder(userId string, req *dto.CreateOrderRequest) (
 	}
 
 	order.TotalAmount = totalAmount
-	err := s.app.Repositories.Order.CreateOrder(&order)
+
+	err = s.app.Repositories.Order().CreateOrder(tx, &order)
+	if err != nil {
+		return dto.CreateOrderResponse{}, err
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		return dto.CreateOrderResponse{}, err
 	}
@@ -63,7 +62,7 @@ func (s *OrderService) CreateOrder(userId string, req *dto.CreateOrderRequest) (
 }
 
 func (s *OrderService) UpdateOrderStatus(id string, req *dto.UpdateOrderStatusRequest) (dto.UpdateOrderStatusResponse, error) {
-	order, err := s.app.Repositories.Order.GetOrderByID(id)
+	order, err := s.app.Repositories.Order().GetOrderByID(id)
 	if err != nil {
 		return dto.UpdateOrderStatusResponse{}, err
 	}
@@ -73,7 +72,7 @@ func (s *OrderService) UpdateOrderStatus(id string, req *dto.UpdateOrderStatusRe
 	}
 	status := models.OrderStatus(req.Status)
 
-	err = s.app.Repositories.Order.UpdateOrderStatus(order.ID, status)
+	err = s.app.Repositories.Order().UpdateOrderStatus(order.ID, status)
 	if err != nil {
 		return dto.UpdateOrderStatusResponse{}, err
 	}
@@ -85,7 +84,7 @@ func (s *OrderService) UpdateOrderStatus(id string, req *dto.UpdateOrderStatusRe
 }
 
 func (s *OrderService) GetOrders(userID string) ([]dto.GetOrderResponse, error) {
-	orders, err := s.app.Repositories.Order.GetUserOrders(userID)
+	orders, err := s.app.Repositories.Order().GetUserOrders(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +104,7 @@ func (s *OrderService) GetOrders(userID string) ([]dto.GetOrderResponse, error) 
 }
 
 func (s *OrderService) CancelOrder(id, userID string) error {
-	order, err := s.app.Repositories.Order.GetOrderByID(id)
+	order, err := s.app.Repositories.Order().GetOrderByID(id)
 	if err != nil {
 		return err
 	}
@@ -115,9 +114,9 @@ func (s *OrderService) CancelOrder(id, userID string) error {
 	}
 
 	if order.UserID != userID {
-		return internal.WrapErrorMessage(internal.ErrForbidden, "you can only cancel your own orders")
 
+		return internal.WrapErrorMessage(internal.ErrForbidden, "you can only cancel your own orders")
 	}
 
-	return s.app.Repositories.Order.UpdateOrderStatus(order.ID, models.OrderStatusCancelled)
+	return s.app.Repositories.Order().UpdateOrderStatus(order.ID, models.OrderStatusCancelled)
 }

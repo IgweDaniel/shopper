@@ -65,17 +65,13 @@ func (r *PostgresProductRepository) DeleteProduct(id string) error {
 	return err
 }
 
-func (r *PostgresProductRepository) UpdateUnderLock(productID string, updaterFunc func(product *models.Product) error) (*models.Product, error) {
+func (r *PostgresProductRepository) UpdateProductStock(tx contracts.Transaction, productID string, quantity int) (*models.Product, error) {
+	pgTx := tx.(*PostgresTransaction).tx
 	var product models.Product
-	tx, err := r.DB.Begin()
-	if err != nil {
-		return &product, err
-	}
 
-	defer tx.Rollback()
-
-	err = tx.QueryRow("SELECT id, name, description, price, stock FROM products WHERE id = $1 FOR UPDATE", productID).Scan(
-		&product.ID, &product.Name, &product.Description, &product.Price, &product.Stock)
+	err := pgTx.QueryRow("SELECT id, name, description, price, stock FROM products WHERE id = $1 FOR UPDATE", productID).Scan(
+		&product.ID, &product.Name, &product.Description, &product.Price, &product.Stock,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return &product, internal.WrapErrorMessage(internal.ErrNotFound, "product not found")
@@ -83,15 +79,52 @@ func (r *PostgresProductRepository) UpdateUnderLock(productID string, updaterFun
 		return &product, err
 	}
 
-	err = updaterFunc(&product)
-	if err != nil {
-		return &product, err
+	if product.Stock < quantity {
+		return &product, internal.WrapErrorMessage(internal.ErrBadRequest, "insufficient stock")
 	}
 
-	_, err = tx.Exec("UPDATE products SET name = $1, description = $2, price = $3 WHERE id = $4", product.Name, product.Description, product.Price, product.ID)
+	product.Stock -= quantity
+
+	_, err = pgTx.Exec("UPDATE products SET stock = $1 WHERE id = $2", product.Stock, product.ID)
+	return &product, err
+}
+
+func (r *PostgresProductRepository) Update(id string, updates map[string]interface{}) error {
+	tx, err := r.DB.Begin()
 	if err != nil {
-		return &product, err
+		return err
 	}
 
-	return &product, tx.Commit()
+	defer tx.Rollback()
+
+	var product models.Product
+
+	err = tx.QueryRow("SELECT id, name, description, price, stock FROM products WHERE id = $1 FOR UPDATE", product.ID).Scan(
+		&product.ID, &product.Name, &product.Description, &product.Price, &product.Stock)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return internal.WrapErrorMessage(internal.ErrNotFound, "product not found")
+		}
+		return err
+	}
+
+	for key, value := range updates {
+		switch key {
+		case "name":
+			product.Name = value.(string)
+		case "description":
+			product.Description = value.(string)
+		case "price":
+			product.Price = value.(float64)
+		case "stock":
+			product.Stock = value.(int)
+		}
+	}
+
+	_, err = tx.Exec("UPDATE products SET name = $1, description = $2, price = $3, stock= $4 WHERE id = $5", product.Name, product.Description, product.Price, product.Stock, product.ID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }

@@ -16,29 +16,23 @@ func NewPostgresOrderRepository(db *sql.DB) contracts.OrderRepository {
 	return &PostgresOrderRepository{DB: db}
 }
 
-func (r *PostgresOrderRepository) CreateOrder(order *models.Order) error {
-	tx, err := r.DB.Begin()
-	if err != nil {
-		return err
-	}
-
+func (r *PostgresOrderRepository) CreateOrder(tx contracts.Transaction, order *models.Order) error {
+	pgTx := tx.(*PostgresTransaction).tx
 	query := "INSERT INTO orders (user_id, status, total_amount) VALUES ($1, $2, $3) RETURNING id"
-	err = tx.QueryRow(query, order.UserID, order.Status, order.TotalAmount).Scan(&order.ID)
+	err := pgTx.QueryRow(query, order.UserID, order.Status, order.TotalAmount).Scan(&order.ID)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	for _, product := range order.Products {
 		query = "INSERT INTO order_products (order_id, product_id, quantity) VALUES ($1, $2, $3)"
-		_, err = tx.Exec(query, order.ID, product.ProductID, product.Quantity)
+		_, err = pgTx.Exec(query, order.ID, product.ProductID, product.Quantity)
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 
-	return tx.Commit()
+	return nil
 }
 
 func (r *PostgresOrderRepository) GetUserOrders(userID string) ([]models.Order, error) {
