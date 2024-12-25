@@ -131,12 +131,9 @@ The API documentation is generated using Swagger. You can access the Swagger UI 
 
 Please read `CONTRIBUTING.md` for details on our code of conduct, and the process for submitting pull requests.
 
-## License
-
-This project is licensed under the Apache 2.0 License - see the `LICENSE` file for details.
-
-## Acknowledgments
+## Tools & Frameworks Used
 
 - Swaggo for generating Swagger documentation
 - Echo for the web framework
 - Golang-JWT for JWT authentication
+- Golang-migrate for database migrations
