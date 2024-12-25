@@ -29,7 +29,7 @@ type CustomRefreshJwtClaims struct {
 // and expiration time of the access token.
 // Different access and refresh token secrets are used to prevent
 // the signed tokens from being used in place of each other.
-func GenerateTokens(app internal.Application, user models.User) (string, string, int64, error) {
+func GenerateTokens(app *internal.Application, user *models.User) (string, string, int64, error) {
 	// generate access token with a lifetime of 15 minutes
 	accessTokenExpiration := time.Now().Add(AccessTokenDuration)
 	accessClaims := CustomAccessJwtClaims{

@@ -110,10 +110,10 @@ func (h *ProductHandler) UpdateProduct(c echo.Context) error {
 
 	resp, err := h.Service.UpdateProduct(id, req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update product"})
+		return helpers.HandleError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, helpers.BuildResponse("product updated", resp))
 }
 
 // DeleteProduct godoc
@@ -133,7 +133,7 @@ func (h *ProductHandler) DeleteProduct(c echo.Context) error {
 	id := c.Param("id")
 
 	if err := h.Service.DeleteProduct(id); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete product"})
+		return helpers.HandleError(c, err)
 	}
 
 	return c.NoContent(http.StatusNoContent)

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/IgweDaniel/shopper/internal"
 	"github.com/IgweDaniel/shopper/internal/contracts"
@@ -90,6 +91,8 @@ func (r *PostgresProductRepository) UpdateProductStock(tx contracts.Transaction,
 }
 
 func (r *PostgresProductRepository) Update(id string, updates map[string]interface{}) error {
+	fmt.Println("id", id)
+	fmt.Println("updates", updates)
 	tx, err := r.DB.Begin()
 	if err != nil {
 		return err
@@ -99,7 +102,7 @@ func (r *PostgresProductRepository) Update(id string, updates map[string]interfa
 
 	var product models.Product
 
-	err = tx.QueryRow("SELECT id, name, description, price, stock FROM products WHERE id = $1 FOR UPDATE", product.ID).Scan(
+	err = tx.QueryRow("SELECT id, name, description, price, stock FROM products WHERE id = $1 FOR UPDATE", id).Scan(
 		&product.ID, &product.Name, &product.Description, &product.Price, &product.Stock)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -107,6 +110,8 @@ func (r *PostgresProductRepository) Update(id string, updates map[string]interfa
 		}
 		return err
 	}
+
+	fmt.Println("product", product)
 
 	for key, value := range updates {
 		switch key {

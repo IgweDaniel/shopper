@@ -57,7 +57,7 @@ func (s *UserService) LoginUser(req *dto.LoginUserRequest) (dto.LoginUserRespons
 		return dto.LoginUserResponse{}, internal.WrapErrorMessage(internal.ErrNotAuthorized, "invalid credentials")
 	}
 
-	accessToken, refreshToken, expiration, err := helpers.GenerateTokens(*s.app, *user)
+	accessToken, refreshToken, expiration, err := helpers.GenerateTokens(s.app, user)
 	if err != nil {
 		return dto.LoginUserResponse{}, internal.WrapErrorMessage(err, "failed to issue tokens")
 	}

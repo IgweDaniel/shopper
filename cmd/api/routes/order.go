@@ -11,5 +11,5 @@ func (r *Router) registerOrderRoutes(handler *handlers.OrderHandler) {
 	orders.POST("", handler.CreateOrder, middleware.Authentication(r.App), middleware.ValidateDTO(&dto.CreateOrderRequest{}))
 	orders.GET("/me", handler.GetOrders, middleware.Authentication(r.App))
 	orders.PUT("/:id/cancel", handler.CancelOrder, middleware.Authentication(r.App))
-	orders.PUT("/:id/status", handler.UpdateOrderStatus, middleware.RequireAdmin, middleware.Authentication(r.App), middleware.ValidateDTO(&dto.UpdateOrderStatusRequest{}))
+	orders.PUT("/:id/status", handler.UpdateOrderStatus, middleware.Authentication(r.App), middleware.RequireAdmin, middleware.ValidateDTO(&dto.UpdateOrderStatusRequest{}))
 }

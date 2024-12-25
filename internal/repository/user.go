@@ -13,7 +13,7 @@ type PostgresUserRepository struct {
 	DB *sql.DB
 }
 
-const duplicateEmail = "users_email_key"
+const duplicateEmail = "users_"
 
 func NewPostgresUserRepository(db *sql.DB) contracts.UserRepository {
 	return &PostgresUserRepository{DB: db}

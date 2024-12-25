@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"fmt"
+
 	"github.com/IgweDaniel/shopper/cmd/api/helpers"
 	"github.com/IgweDaniel/shopper/internal"
 	"github.com/golang-jwt/jwt/v5"
@@ -24,6 +26,7 @@ func Authentication(app *internal.Application) echo.MiddlewareFunc {
 func RequireAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		user := helpers.ContextGetUser(ctx)
+		fmt.Println(user)
 		if !user.IsAdmin {
 			return helpers.HandleError(ctx, internal.WrapErrorMessage(internal.ErrForbidden, "admin privilege required"))
 		}
